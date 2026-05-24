@@ -1,0 +1,21 @@
+{
+  "name": "01_devcamper_api",
+  "version": "1.0.0",
+  "description": "Devcamper backend API",
+  "license": "MIT",
+  "author": "Manuchehr Ahmadkhonov",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node server",
+    "dev": "nodemon server"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.14"
+  }
+}
