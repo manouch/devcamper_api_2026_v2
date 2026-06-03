@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const geocoder = require("../utils/geocoder");
 
 const BootcampSchema = new mongoose.Schema({
   name: {
@@ -12,7 +13,6 @@ const BootcampSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, "Please add a description"],
-    unique: true,
     trim: true,
     maxlength: [500, "Decription can not be more thatn 500 characters"],
   },
