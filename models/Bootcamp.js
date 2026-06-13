@@ -44,11 +44,11 @@ const BootcampSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ["Point"],
-      required: true,
+      // required: true,
     },
     coordinates: {
       type: [Number],
-      required: true,
+      // required: true,
       index: "2dsphere",
     },
     formattedAddress: String,
@@ -111,8 +111,9 @@ BootcampSchema.pre("save", function (next) {
 });
 
 // Geocode & create location field
-BootcampSchema.pre("save", async function (next) {
+BootcampSchema.pre("save", async function () {
   const loc = await geocoder.geocode(this.address);
+
   this.location = {
     type: "Point",
     coordinates: [loc[0].longitude, loc[0].latitude],
@@ -124,9 +125,7 @@ BootcampSchema.pre("save", async function (next) {
     country: loc[0].countryCode,
   };
 
-  // Do not save address in DB
   this.address = undefined;
-  // next();
 });
 
 module.exports = mongoose.model("Bootcamp", BootcampSchema);
