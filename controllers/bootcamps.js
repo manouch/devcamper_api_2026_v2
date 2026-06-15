@@ -6,12 +6,79 @@ const Bootcamp = require("../models/Bootcamp");
 // @desc    Get all bootcamps
 // @route   Get /api/v1/bootcamps
 // @access  Public
+/*
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
-  const bootcamps = await Bootcamp.find();
+  let query;
+
+  let queryStr = JSON.stringify(req.query);
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`,
+  );
+  console.log(queryStr);
+
+  query = Bootcamp.find(JSON.parse(queryStr));
+  const bootcamps = await query;
 
   res
     .status(200)
     .json({ success: true, count: bootcamps.length, data: bootcamps });
+});
+*/
+
+exports.getBootcamps = asyncHandler(async (req, res, next) => {
+  const reqQuery = { ...req.query };
+
+  // remove special fields
+  const removeFields = ["select", "sort", "page", "limit"];
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  const queryObj = {};
+
+  for (let key in reqQuery) {
+    // check for operator format: field[op]
+    const match = key.match(/(.+)\[(.+)\]/);
+
+    if (match) {
+      const field = match[1]; // e.g. careers
+      const operator = match[2]; // e.g. in, lte
+
+      if (!queryObj[field]) {
+        queryObj[field] = {};
+      }
+
+      let value = reqQuery[key];
+
+      // -----------------------------
+      // HANDLE "in" OPERATOR (ARRAYS)
+      // -----------------------------
+      if (operator === "in") {
+        value = value.split(","); // supports multiple values
+      }
+
+      // -----------------------------
+      // HANDLE NUMBERS SAFELY
+      // -----------------------------
+      if (operator !== "in" && !isNaN(value)) {
+        value = Number(value);
+      }
+
+      queryObj[field][`$${operator}`] = value;
+    } else {
+      // normal key-value filters
+      queryObj[key] = reqQuery[key];
+    }
+  }
+
+  console.log("FINAL QUERY OBJECT:", queryObj);
+
+  const bootcamps = await Bootcamp.find(queryObj);
+
+  res.status(200).json({
+    success: true,
+    count: bootcamps.length,
+    data: bootcamps,
+  });
 });
 
 // @desc    Get single bootcamp

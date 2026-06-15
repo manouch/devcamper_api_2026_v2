@@ -111,8 +111,32 @@ BootcampSchema.pre("save", function (next) {
 });
 
 // Geocode & create location field
+// BootcampSchema.pre("save", async function () {
+//   const loc = await geocoder.geocode(this.address);
+
+//   this.location = {
+//     type: "Point",
+//     coordinates: [loc[0].longitude, loc[0].latitude],
+//     formattedAddress: loc[0].formattedAddress,
+//     street: loc[0].streetName,
+//     city: loc[0].city,
+//     state: loc[0].stateCode,
+//     zipcode: loc[0].zipcode,
+//     country: loc[0].countryCode,
+//   };
+
+//   this.address = undefined;
+//   next();
+// });
+
 BootcampSchema.pre("save", async function () {
   const loc = await geocoder.geocode(this.address);
+
+  const stateMap = {
+    Massachusetts: "MA",
+    "Rhode Island": "RI",
+    Vermont: "VT",
+  };
 
   this.location = {
     type: "Point",
@@ -120,7 +144,7 @@ BootcampSchema.pre("save", async function () {
     formattedAddress: loc[0].formattedAddress,
     street: loc[0].streetName,
     city: loc[0].city,
-    state: loc[0].stateCode,
+    state: stateMap[loc[0].state] || loc[0].state,
     zipcode: loc[0].zipcode,
     country: loc[0].countryCode,
   };
