@@ -72,7 +72,26 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
   console.log("FINAL QUERY OBJECT:", queryObj);
 
-  const bootcamps = await Bootcamp.find(queryObj);
+  // const bootcamps = await Bootcamp.find(queryObj);
+  let query = Bootcamp.find(queryObj);
+
+  // SELECT Fields
+  if (req.query.select) {
+    const fields = req.query.select.split(",").join(" ");
+    console.log("SELECT FIELDS:", fields);
+    query = query.select(fields);
+  }
+
+  // Sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort("-createdAt");
+  }
+
+  // EXECUTE QUERY
+  const bootcamps = await query;
 
   res.status(200).json({
     success: true,
