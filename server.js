@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const colors = require("colors");
 const fileupload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
+// const mongoSanitize = require("express-mongo-sanitize");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
@@ -38,6 +39,24 @@ if (process.env.NODE_ENV === "development") {
 
 // File uploading
 app.use(fileupload());
+
+// Sanitize data for Express 5
+const sanitize = (obj) => {
+  for (const key in obj) {
+    if (key.startsWith("$")) {
+      delete obj[key];
+    } else if (typeof obj[key] === "object" && obj[key] !== null) {
+      sanitize(obj[key]);
+    }
+  }
+};
+// Sanitize data
+// app.use(mongoSanitize());
+app.use((req, res, next) => {
+  sanitize(req.body);
+  sanitize(req.params);
+  next();
+});
 
 // Set static folder
 app.use(express.static(path.join(__dirname, "public")));
